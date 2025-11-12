@@ -21,15 +21,16 @@ def record(cap, segment_duration, out):
 
 
 def loop(url, output_dir, segment_duration, trig_mean, trig_std):
-    cap = cv2.VideoCapture(url)
-    w = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-    h = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-    fps = cap.get(cv2.CAP_PROP_FPS)
-
     exit_requested = False
 
-    old_frame_cropped = None
+    cap = cv2.VideoCapture(url)
+
     try:
+        w = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+        h = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        fps = cap.get(cv2.CAP_PROP_FPS)
+
+        old_frame_cropped = None
         while not exit_requested:
             ret, frame = cap.read()
             if not ret:
@@ -69,12 +70,15 @@ def loop(url, output_dir, segment_duration, trig_mean, trig_std):
         print('CV2 error:', e)
     except AppError as e:
         print(e)
+
     except Exception as e:
         print('Error', e)
+    except KeyboardInterrupt:
+        return exit_requested
     else:
         print("No problem reported")
-
-    cap.release()
+    finally:
+        cap.release()
 
     return exit_requested
 
