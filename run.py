@@ -31,6 +31,7 @@ def loop(url, output_dir, segment_duration, trig_mean, trig_std):
         fps = cap.get(cv2.CAP_PROP_FPS)
 
         old_frame_cropped = None
+        print("Starting watching for changes...")
         while not exit_requested:
             ret, frame = cap.read()
             if not ret:
@@ -74,7 +75,7 @@ def loop(url, output_dir, segment_duration, trig_mean, trig_std):
     except Exception as e:
         print('Error', e)
     except KeyboardInterrupt:
-        return exit_requested
+        return True
     else:
         print("No problem reported")
     finally:
@@ -84,7 +85,6 @@ def loop(url, output_dir, segment_duration, trig_mean, trig_std):
 
 
 def run(url, output_dir, segment_duration, trig_mean, trig_std):
-    print("Starting watching for changes...")
     exit_requested = False
 
     try:
@@ -102,8 +102,6 @@ def run(url, output_dir, segment_duration, trig_mean, trig_std):
         if len(list_of_files) == 15:
             oldest_file = min(full_path, key=os.path.getctime)
             os.remove(oldest_file)
-
-    cv2.destroyAllWindows()
 
 
 def main():
