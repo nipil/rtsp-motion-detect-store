@@ -34,22 +34,29 @@ def loop(url, output_dir, segment_duration, trig_mean, trig_std):
             ret, frame = cap.read()
             if not ret:
                 raise AppError("Could not get frame")
+
             frame_cropped = frame[int(h * 0.1):int(h), :]
             if old_frame_cropped is None:
                 old_frame_cropped = frame_cropped
+                continue
 
             delta_frame = cv2.absdiff(old_frame_cropped, frame_cropped)
+            old_frame_cropped = frame_cropped
+
             (delta_means, delta_stds) = cv2.meanStdDev(delta_frame)
             delta_means = fmean(delta_means)
             delta_stds = fmean(delta_stds)
+
             start_record = False
             if delta_means > trig_mean or delta_stds > trig_std:
                 start_record = True
             if not start_record:
                 continue
+
             dt = datetime.now().isoformat().replace(':', '-').replace('.', '-')
             fourcc = cv2.VideoWriter_fourcc(*'mp4v')
             out = cv2.VideoWriter(f"{output_dir}/output_{dt}.mp4", fourcc, fps, (int(w), int(h)))
+
             try:
                 print(f"{dt} triggering {delta_means=} {delta_stds=}")
                 record(cap, segment_duration, out)
@@ -73,6 +80,7 @@ def loop(url, output_dir, segment_duration, trig_mean, trig_std):
 
 
 def run(url, output_dir, segment_duration, trig_mean, trig_std):
+    print("Starting watching for changes...")
     exit_requested = False
 
     try:
